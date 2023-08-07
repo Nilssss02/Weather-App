@@ -1,116 +1,112 @@
 let weather = {
-  apiKey: "API KEY GOES HERE",
-  fetchWeather: function (city) {
-    fetch(
-      "https://api.openweathermap.org/data/2.5/weather?q=" +
-        city +
-        "&units=metric&appid=" +
-        this.apiKey
-    )
-      .then((response) => {
-        if (!response.ok) {
-          alert("No weather found.");
-          throw new Error("No weather found.");
-        }
-        return response.json();
-      })
-      .then((data) => this.displayWeather(data));
-  },
-  displayWeather: function (data) {
-    const { name } = data;
-    const { icon, description } = data.weather[0];
-    const { temp, humidity } = data.main;
-    const { speed } = data.wind;
-    document.querySelector(".city").innerText = "Weather in " + name;
-    document.querySelector(".icon").src =
-      "https://openweathermap.org/img/wn/" + icon + ".png";
-    document.querySelector(".description").innerText = description;
-    document.querySelector(".temp").innerText = temp + "°C";
-    document.querySelector(".humidity").innerText =
-      "Humidity: " + humidity + "%";
-    document.querySelector(".wind").innerText =
-      "Wind speed: " + speed + " km/h";
-    document.querySelector(".weather").classList.remove("loading");
-    document.body.style.backgroundImage =
-      "url('https://source.unsplash.com/1600x900/?" + name + "')";
-  },
-  search: function () {
-    this.fetchWeather(document.querySelector(".search-bar").value);
-  },
+    apiKey: "bcddb19f910e757c19a6a59cace916b4",
+
+    fetchWeather: function(city) {
+        fetch(
+            "https://api.openweathermap.org/data/2.5/weather?q=" 
+            + city 
+            + "&units=metric&appid=" 
+            + this.apiKey
+        )    
+        .then((Response) => Response.json())
+        .then((data) => this.displayWeather(data));
+        },
+
+    displayWeather: function(data) {
+        const { name } = data;
+        const { icon, description } = data.weather[0];
+        const { temp, humidity } = data.main;
+        const { speed } = data.wind;
+        document.querySelector(".city").innerText = "Weather in " + name;
+        document.querySelector(".icon").src = "https://openweathermap.org/img/wn/" + icon +  ".png";
+        document.querySelector(".description").innerText = description;
+        document.querySelector(".temp").innerText = temp + "°C";
+        document.querySelector(".humidity").innerText = "Humidity: " + humidity + "%";
+        document.querySelector(".wind").innerText = "Wind speed: " + speed + " km/h";
+        document.querySelector(".weather").classList.remove("loading");
+        document.body.style.backgroundImage = "url('https://source.unsplash.com/1600x900/?" + name + "')";
+    },
+    search: function() {
+        this.fetchWeather(document.querySelector(".search-bar").value);
+    } 
 };
 
 let geocode = {
-  reverseGeocode: function (latitude, longitude) {
-    var apikey = "2cad6041208649f7bacaf9013ad4ec2e";
+    reverseGeocode: function (latitude, longitude) {
+        var api_key = '2f5449583ae246429d56e379f438842f';
 
-    var api_url = "https://api.opencagedata.com/geocode/v1/json";
+  // reverse geocoding example (coordinates to address)
+  var query = latitude + ',' + longitude;
 
-    var request_url =
-      api_url +
-      "?" +
-      "key=" +
-      apikey +
-      "&q=" +
-      encodeURIComponent(latitude + "," + longitude) +
-      "&pretty=1" +
-      "&no_annotations=1";
+  // forward geocoding example (address to coordinate)
+  // var query = 'Philipsbornstr. 2, 30165 Hannover, Germany';
+  // note: query needs to be URI encoded (see below)
 
-    // see full list of required and optional parameters:
-    // https://opencagedata.com/api#forward
+  var api_url = 'https://api.opencagedata.com/geocode/v1/json'
 
-    var request = new XMLHttpRequest();
-    request.open("GET", request_url, true);
+  var request_url = api_url
+    + '?'
+    + 'key=' + api_key
+    + '&q=' + encodeURIComponent(query)
+    + '&pretty=1'
+    + '&no_annotations=1';
 
-    request.onload = function () {
-      // see full list of possible response codes:
-      // https://opencagedata.com/api#codes
+  // see full list of required and optional parameters:
+  // https://opencagedata.com/api#forward
 
-      if (request.status == 200) {
-        // Success!
-        var data = JSON.parse(request.responseText);
-        weather.fetchWeather(data.results[0].components.city);
-        console.log(data.results[0].components.city)
-      } else if (request.status <= 500) {
-        // We reached our target server, but it returned an error
+  var request = new XMLHttpRequest();
+  request.open('GET', request_url, true);
 
-        console.log("unable to geocode! Response code: " + request.status);
-        var data = JSON.parse(request.responseText);
-        console.log("error msg: " + data.status.message);
-      } else {
-        console.log("server error");
-      }
-    };
+  request.onload = function() {
+    // see full list of possible response codes:
+    // https://opencagedata.com/api#codes
 
-    request.onerror = function () {
-      // There was a connection error of some sort
-      console.log("unable to connect to server");
-    };
+    if (request.status === 200){
+      // Success!
+      var data = JSON.parse(request.responseText);
+      weather.fetchWeather(data.results[0].components.state);
 
-    request.send(); // make the request
-  },
-  getLocation: function() {
-    function success (data) {
-      geocode.reverseGeocode(data.coords.latitude, data.coords.longitude);
+    } else if (request.status <= 500){
+      // We reached our target server, but it returned an error
+
+      console.log("unable to geocode! Response code: " + request.status);
+      var data = JSON.parse(request.responseText);
+      console.log('error msg: ' + data.status.message);
+    } else {
+      console.log("server error");
     }
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(success, console.error);
+  };
+
+  request.onerror = function() {
+    // There was a connection error of some sort
+    console.log("unable to connect to server");
+  };
+
+  request.send();
+    },
+
+    getLocation: function () {
+        function success (data) {
+            geocode.reverseGeocode(data.coords.latitude, data.coords.longitude);
+        }
+        if (navigator.geolocation){
+            navigator.geolocation.getCurrentPosition(success, console.error);
+        }
+        else{
+            weather.fetchWeather("Denver");
+        }
+        
     }
-    else {
-      weather.fetchWeather("Denver");
-    }
-  }
 };
 
 document.querySelector(".search button").addEventListener("click", function () {
-  weather.search();
+    weather.search();
 });
 
-document
-  .querySelector(".search-bar")
-  .addEventListener("keyup", function (event) {
-    if (event.key == "Enter") {
-      weather.search();
+document.querySelector(".search-bar").addEventListener("keyup", function (event) {
+    if(event.key == "Enter"){
+        weather.search();
     }
-  });
+});
 
 geocode.getLocation();
